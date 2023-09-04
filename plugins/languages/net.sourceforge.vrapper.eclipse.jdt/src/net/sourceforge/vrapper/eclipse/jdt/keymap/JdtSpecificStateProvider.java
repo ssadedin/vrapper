@@ -9,10 +9,12 @@ import static net.sourceforge.vrapper.keymap.vim.ConstructorWrappers.prefixedOpe
 import static net.sourceforge.vrapper.keymap.vim.ConstructorWrappers.state;
 import static net.sourceforge.vrapper.keymap.vim.ConstructorWrappers.transitionBind;
 import static net.sourceforge.vrapper.vim.commands.CommandWrappers.seq;
+
 import net.sourceforge.vrapper.eclipse.commands.EclipseCommand;
 import net.sourceforge.vrapper.eclipse.keymap.AbstractEclipseSpecificStateProvider;
 import net.sourceforge.vrapper.keymap.KeyMapInfo;
 import net.sourceforge.vrapper.keymap.State;
+import net.sourceforge.vrapper.log.VrapperLog;
 import net.sourceforge.vrapper.platform.CursorService;
 import net.sourceforge.vrapper.vim.commands.Command;
 import net.sourceforge.vrapper.vim.commands.DeselectAllCommand;
@@ -27,6 +29,7 @@ public class JdtSpecificStateProvider extends AbstractEclipseSpecificStateProvid
 		return state(
 				leafBind('d', gotoDecl()),
 				leafBind('D', gotoDecl()),
+				leafBind('c', gotoCtagsDecl()),
 				leafBind('r', editJava("refactor.quickMenu")),
 				leafBind('m', editJava("source.quickMenu")), // gs/gS should be taken by swap plug-in
 				leafBind('R', editJava("rename.element")));
@@ -43,6 +46,7 @@ public class JdtSpecificStateProvider extends AbstractEclipseSpecificStateProvid
 		return union(
                 state(
                 		leafCtrlBind(']', gotoDecl()),
+                		leafCtrlBind('\\', gotoCtagsDecl()),
                 		transitionBind('g', getGSomethingBindings())),
                 prefixedOperatorCmds('g', 'c', editJavaAndDeselect("toggle.comment"), textObjects),
                 operatorCmds('=', editJavaAndDeselect("indent"), textObjects));
@@ -84,7 +88,13 @@ public class JdtSpecificStateProvider extends AbstractEclipseSpecificStateProvid
 	
 	protected static Command gotoDecl() {
 		// NOTE: deselect won't work in other editor
+		VrapperLog.info("Going to declaration");
 		return seq(new SetMarkCommand(CursorService.LAST_JUMP_MARK), editJavaAndDeselect("open.editor"));
+	}
+	
+	protected static Command gotoCtagsDecl() {
+		return seq(new SetMarkCommand(CursorService.LAST_JUMP_MARK), 
+				new OpenElementViaCTagsCommand("org.eclipse.jdt.ui.commands.openElementInEditor"));
 	}
 
 	protected static Command editJava(String cmd) {
