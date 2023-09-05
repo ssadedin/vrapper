@@ -29,7 +29,7 @@ public class JdtSpecificStateProvider extends AbstractEclipseSpecificStateProvid
 		return state(
 				leafBind('d', gotoDecl()),
 				leafBind('D', gotoDecl()),
-				leafBind('c', gotoCtagsDecl()),
+				leafBind('C', gotoCtagsDecl()),
 				leafBind('r', editJava("refactor.quickMenu")),
 				leafBind('m', editJava("source.quickMenu")), // gs/gS should be taken by swap plug-in
 				leafBind('R', editJava("rename.element")));
